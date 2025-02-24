@@ -1,0 +1,654 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMPREVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background: #6b43c7;
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .top-menu {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-item {
+            padding: 0.5rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .menu-item:hover {
+            background: rgba(107, 67, 199, 0.3);
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            border: none;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            background: #242424;
+        }
+
+        .import-section {
+            display: flex;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .import-button {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .import-button:hover {
+            background: #242424;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .file-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: white;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .file-card:hover .delete-button {
+            opacity: 1;
+        }
+
+        .delete-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #6b43c7;
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .file-info {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+
+        .file-date {
+            margin-top: 0.25rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #2d2d2d;
+        }
+
+        .page-btn.active {
+            background: #41306c;
+            cursor: default;
+        }
+
+        .page-dots {
+            color: white;
+            padding: 0 0.5rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed #6b43c7;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .file-drop-zone:hover {
+            border-color: #5936a2;
+            background: rgba(107, 67, 199, 0.1);
+        }
+
+        .file-drop-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-drop-subtext {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+
+        .page-btn.next-prev {
+        font-size: 16px;
+        padding: 10px 16px;
+        min-width: 50px;
+        font-weight: bold;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    <nav class="top-menu">
+        <h2>COMPREVE</h2>
+        <a href="{% url 'fichiers' %}" class="menu-item active">Fichiers</a>
+        <a href="{% url 'recherche' %}" class="menu-item">Recherche</a>
+    </nav>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Rechercher un fichier..." autocomplete="off">
+    </div>
+
+    <div class="import-section">
+        <button class="import-button">Importer un fichier JSON</button>
+    </div>
+
+    <div class="files-grid">
+        {% for file in files %}
+        <a href="{% url 'bases_de_donnees' %}?file={{ file.name }}" class="file-card" data-filename="{{ file.name|escapejs }}">
+            <button class="delete-button" onclick="deleteFile(event, '{{ file.name|escapejs }}')">&times;</button>
+            <div class="file-icon">📄</div>
+            <div class="file-name">{{ file.name }}</div>  <!-- Now displays full filename -->
+            <div class="file-info">
+                {% with parts=file.name|split:"_" %}
+                    {% for part in parts %}
+                        {% if part|slice:":2" == "20" %}
+                            <div class="file-date">{{ part }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if current_page > 1 %}
+        <a href="?page={{ current_page|add:'-1' }}" class="page-btn next-prev">«</a>
+    {% endif %}
+
+    {% for i in total_pages|get_range %}
+        {% if i == 1 or i == total_pages or i >= current_page|add:'-2' and i <= current_page|add:'2' %}
+            <a href="?page={{ i }}" class="page-btn {% if i == current_page %}active{% endif %}">{{ i }}</a>
+        {% elif i == current_page|add:'-3' or i == current_page|add:'3' %}
+            <span class="page-dots">...</span>
+        {% endif %}
+    {% endfor %}
+
+    {% if current_page < total_pages %}
+        <a href="?page={{ current_page|add:'1' }}" class="page-btn next-prev">»</a>
+    {% endif %}
+</div>
+{% endif %}
+
+        <div id="importModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Importer un fichier JSON</div>
+                    <button class="close-button">&times;</button>
+                </div>
+                <form id="uploadForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="file-drop-zone" onclick="document.getElementById('fileInput').click()">
+                        <div class="file-drop-text">Cliquez pour sélectionner un fichier</div>
+                        <div class="file-drop-subtext">ou glissez-déposez votre fichier ici</div>
+                    </div>
+                    <input type="file" id="fileInput" name="files" accept=".json" multiple style="display: none;">
+                </form>
+            </div>
+        </div>
+
+
+    <script>
+
+class FileManager {
+    constructor() {
+        // Initialisation des éléments DOM et des variables
+        this.searchInput = document.getElementById('searchInput');
+        this.currentPage = 1;
+        this.searchTimeout = null;
+        this.fileInput = document.getElementById('fileInput');
+        this.dropZone = document.querySelector('.file-drop-zone');
+        this.init();
+    }
+
+    init() {
+        // Initialisation des écouteurs d'événements
+        document.addEventListener("DOMContentLoaded", () => this.loadFilesFromURL());
+        this.searchInput.addEventListener('input', (e) => this.handleSearchInput(e));
+
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', (event) => this.handleFormSubmit(event));
+        }
+
+        this.fileInput.addEventListener('change', () => this.handleFileUpload(this.fileInput.files));
+        this.setupDragAndDrop();
+
+        // Ajout d'écouteurs pour les boutons d'importation et de fermeture
+        const importButton = document.querySelector('.import-button');
+        if (importButton) {
+            importButton.addEventListener('click', () => this.openImportModal());
+        }
+
+        const closeButton = document.querySelector('.close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => this.closeImportModal());
+        }
+    }
+
+
+    loadFilesFromURL() {
+        // Charger les fichiers à partir de l'URL avec les paramètres de recherche et de pagination
+        const urlParams = new URLSearchParams(window.location.search);
+        const savedSearch = urlParams.get('search') || '';
+        const savedPage = parseInt(urlParams.get('page')) || 1;
+
+        this.searchInput.value = savedSearch;
+        this.fetchFiles(savedSearch, savedPage, false);
+    }
+
+    handleSearchInput(e) {
+        // Gérer les entrées dans le champ de recherche avec un délai
+        if (this.searchTimeout) clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.fetchFiles(e.target.value.trim(), 1);
+        }, 300);
+    }
+
+    handleFormSubmit(event) {
+        event.preventDefault();
+        this.fetchFiles(this.searchInput.value.trim(), 1);
+    }
+
+    fetchFiles(searchTerm = "", page = 1, updateUrl = true) {
+        // Récupérer les fichiers depuis le serveur en fonction du terme de recherche et de la page
+        this.currentPage = page;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        } else {
+            url.searchParams.delete('search');
+        }
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.updateFileList(data.files);
+            this.updatePagination(data.current_page, data.total_pages, searchTerm);
+            this.currentPage = data.current_page;
+        })
+        .catch(error => console.error('Error:', error));
+
+        if (updateUrl) {
+            window.history.pushState(null, "", url.toString());
+        }
+    }
+
+    updateFileList(files) {
+        // Mettre à jour la liste des fichiers affichés
+        const fileGrid = document.querySelector('.files-grid');
+        fileGrid.innerHTML = '';
+        files.forEach(file => {
+            const fileItem = document.createElement('a');
+            fileItem.classList.add('file-card');
+            fileItem.href = `{% url 'bases_de_donnees' %}?file=${file.name}`;
+            fileItem.dataset.filename = file.name;
+            fileItem.innerHTML = `
+                <button class="delete-button" onclick="fileManager.deleteFile(event, '${file.name}')">&times;</button>
+                <div class="file-icon">📄</div>
+                <div class="file-name">${file.name}</div>
+                <div class="file-info">
+                    ${file.name.split('_').filter(part => part.slice(0, 2) === '20').map(part => `<div class="file-date">${part}</div>`).join('')}
+                </div>
+            `;
+            fileGrid.appendChild(fileItem);
+        });
+    }
+
+    updatePagination(currentPage, totalPages, searchTerm) {
+        // Mettre à jour la pagination
+        const paginationContainer = document.querySelector('.pagination');
+        if (!paginationContainer) return;
+
+        paginationContainer.innerHTML = '';
+
+        if (currentPage > 1) {
+            paginationContainer.appendChild(this.createPageButton('«', searchTerm, currentPage - 1));
+        }
+
+        let addedDots = false;
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+                paginationContainer.appendChild(this.createPageButton(i, searchTerm, i, i === currentPage));
+                addedDots = false;
+            } else if (!addedDots) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.classList.add('page-dots');
+                paginationContainer.appendChild(dots);
+                addedDots = true;
+            }
+        }
+
+        if (currentPage < totalPages) {
+            paginationContainer.appendChild(this.createPageButton('»', searchTerm, currentPage + 1));
+        }
+    }
+
+    createPageButton(text, searchTerm, page, isActive = false) {
+        // Créer un bouton de pagination
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.classList.add('page-btn');
+        if (isActive) button.classList.add('active');
+        button.addEventListener('click', () => this.fetchFiles(searchTerm, page));
+        return button;
+    }
+
+    deleteFile(event, filename) {
+        // Supprimer un fichier
+        event.preventDefault();
+        console.log("Attempting to delete:", filename);
+
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
+            fetch(`/delete-filename/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({ filename: filename })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server Response:", data);
+                if (data.status === 'success') {
+                    this.fetchFiles(this.searchInput.value.trim(), this.currentPage);
+                } else {
+                    alert('Erreur lors de la suppression du fichier: ' + (data.message || 'Erreur inconnue'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Erreur lors de la suppression du fichier: ' + error.message);
+            });
+        }
+    }
+
+    setupDragAndDrop() {
+        // Configurer la zone de glisser-déposer
+        this.dropZone.addEventListener('dragover', (e) => this.handleDragOver(e));
+        this.dropZone.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+        this.dropZone.addEventListener('drop', (e) => this.handleDrop(e));
+    }
+
+    handleDragOver(e) {
+        // Gérer le survol de la zone de glisser-déposer
+        e.preventDefault();
+        this.dropZone.style.borderColor = '#5936a2';
+        this.dropZone.style.background = 'rgba(107, 67, 199, 0.1)';
+    }
+
+    handleDragLeave(e) {
+        // Gérer le départ de la zone de glisser-déposer
+        e.preventDefault();
+        this.dropZone.style.borderColor = '#6b43c7';
+        this.dropZone.style.background = 'transparent';
+    }
+
+    handleDrop(e) {
+        // Gérer le dépôt de fichiers dans la zone de glisser-déposer
+        e.preventDefault();
+        this.dropZone.style.borderColor = '#6b43c7';
+        this.dropZone.style.background = 'transparent';
+
+        if (e.dataTransfer.files.length > 0) {
+            this.handleFileUpload(e.dataTransfer.files);
+        }
+    }
+
+    handleFileUpload(files) {
+        // Gérer le téléchargement de fichiers
+        if (!files || files.length === 0) return;
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        fetch('/upload_json/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let message = '';
+
+            if (data.success.length) {
+                message += `✅ Le fichier suivant à bien été uploadé: ${data.success.join(', ')}\n`;
+            }
+            if (data.failed.length) {
+                message += `❌ Le fichier n'a pas pu être uploadé : \n`;
+                data.failed.forEach(error => {
+                    message += `- ${error.file}: ${error.error}\n`;
+                });
+            }
+            alert(message);
+
+            this.fetchFiles(this.searchInput.value.trim(), this.currentPage);
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Erreur lors de l\'upload du fichier: ' + error.message);
+        });
+    }
+
+    openImportModal() {
+        // Ouvrir la modale d'importation
+        document.getElementById('importModal').style.display = 'flex';
+    }
+
+    closeImportModal() {
+        // Fermer la modale d'importation
+        document.getElementById('importModal').style.display = 'none';
+    }
+}
+
+
+const fileManager = new FileManager();
+
+window.onclick = function(event) {
+    const modal = document.getElementById('importModal');
+    if (event.target == modal) {
+        fileManager.closeImportModal();
+    }
+}
+
+// Exposer la méthode deleteFile globalement pour les gestionnaires d'événements en ligne
+window.deleteFile = (event, filename) => fileManager.deleteFile(event, filename);
+
+
+
+
+    </script>
+</body>
+</html>

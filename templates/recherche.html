@@ -1,0 +1,1003 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMPREVE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background: #6b43c7;
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .top-menu {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-item {
+            padding: 0.5rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .menu-item:hover {
+            background: rgba(107, 67, 199, 0.3);
+        }
+
+.search-bars-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 2rem;
+    border-radius: 0;
+    max-width: fit-content;
+    width: auto;
+    margin: 0;
+    height: 160px;
+}
+
+
+.search-bar-message, .search-bar-user {
+    background: #1a1a1a;
+    padding: 1rem;
+    border-radius: 0;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+}
+
+        .search-input-user {
+            width: 300px;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(107, 67, 199, 0.3);
+            border-radius: 6px;
+            background: #2d2d2d;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input-user:focus {
+            border-color: #6b43c7;
+        }
+
+                .search-input-message {
+            width: 300px;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(107, 67, 199, 0.3);
+            border-radius: 6px;
+            background: #2d2d2d;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input-user:focus {
+            border-color: #6b43c7;
+        }
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #2d2d2d;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            padding: 8px;
+            right: 0;
+            pointer-events: auto;
+            margin-top: -5px;
+        }
+
+        .dropdown-content a, .dropdown-content label {
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-content a:hover, .dropdown-content label:hover {
+            background-color: rgba(107, 67, 199, 0.3);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .filter-group {
+            margin: 8px 0;
+            padding: 0 12px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+            background: #1a1a1a;
+            border: 1px solid #6b43c7;
+            color: white;
+            border-radius: 4px;
+        }
+
+.export-btn, .filter-btn {
+    padding: 8px 16px;
+    background-color: #6b43c7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+        .export-btn:hover, .filter-btn:hover {
+            background-color: #5632a8;
+        }
+
+
+.main-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.tables-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+
+.selectable-table {
+    background: #1a1a1a;
+    padding: 0.5rem;
+    width: 600px;
+    height: 160px;
+    overflow-y: auto;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    margin-right: 8rem;
+    margin-left: 6rem;
+}
+
+.selected-table {
+    flex-grow: 1;
+    background: #1a1a1a;
+    padding: 1rem;
+    height: 160px;
+    overflow-y: auto;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    border-radius: 25px;
+    margin-bottom: 4rem;
+}
+
+.grid-item {
+    background: #2d2d2d;
+    border-radius: 4px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.3s;
+    min-height: 25px;
+    margin: 2px 4px;
+}
+
+.grid-item:hover {
+    background-color: rgba(107, 67, 199, 0.3);
+}
+
+.grid-item input[type="checkbox"] {
+    margin-left: auto;
+    cursor: pointer;
+    transform: scale(0.9);
+}
+
+
+        .sort-header {
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            padding-right: 1.8rem;
+        }
+
+        .sort-header:hover {
+            background-color: rgba(107, 67, 199, 0.1);
+        }
+
+        .sort-header.active {
+            background-color: rgba(107, 67, 199, 0.2);
+        }
+
+        .sort-header::after {
+            content: '▲';
+            position: absolute;
+            right: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6rem;
+            color: rgba(107, 67, 199, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .sort-header:hover::after {
+            opacity: 0.6;
+        }
+
+        .sort-header.active::after {
+            opacity: 1;
+        }
+
+        .sort-header.active[data-sort="-"]::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .id-cell {
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .id-cell:hover {
+            color: rgba(107, 67, 199, 1);
+            background-color: rgba(107, 67, 199, 0.1);
+        }
+
+        .id-cell.copied {
+            color: rgba(107, 67, 199, 1);
+            background-color: rgba(107, 67, 199, 0.2);
+        }
+
+        .user-cell {
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .user-cell:hover {
+            color: rgba(107, 67, 199, 1);
+            background-color: rgba(107, 67, 199, 0.1);
+        }
+
+        .user-cell.copied {
+            color: rgba(107, 67, 199, 1);
+            background-color: rgba(107, 67, 199, 0.2);
+        }
+
+        .copy-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            left: 0;
+            top: -30px;
+            z-index: 1000;
+            visibility: hidden;
+        }
+
+        .copy-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 10px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        }
+
+        .id-cell.copied .copy-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .data-table {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 1rem;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            table-layout: fixed;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(107, 67, 199, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            height: 60px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+            vertical-align: middle;
+        }
+
+        .data-table th {
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .data-table th:hover {
+            color: #6b43c7;
+        }
+
+        .data-table td.message {
+            white-space: normal;
+            max-width: 300px;
+            padding-right: 2rem;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(107, 67, 199, 0.1);
+        }
+
+        .status-cell {
+            white-space: normal !important;
+            overflow: visible !important;
+            width: 150px;
+            padding: 10px !important;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgb(65, 48, 108);
+            margin: 2px;
+            font-size: 0.75rem;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            background: #2d2d2d;
+            border: 1px solid rgba(107, 67, 199, 0.3);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover {
+            background: #363636;
+            border-color: #6b43c7;
+        }
+
+
+        .page-btn.active {
+            background-color: #7c59cc;
+            color: white;
+            pointer-events: none;
+        }
+
+        .page-btn.first, .page-btn.last {
+            background-color: #412880;
+        }
+
+        .page-btn.first:hover, .page-btn.last:hover {
+            background-color: #302055;
+        }
+
+        .page-btn.prev, .page-btn.next {
+            background-color: #4a3871;
+            color: black;
+        }
+
+        .page-btn.prev:hover, .page-btn.next:hover {
+            background-color: #302055;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-info {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .username {
+            color: #6b43c7;
+            font-weight: 500;
+        }
+
+        .message {
+            word-break: break-word;
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .moderation_starttime{
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .moderation_uptime{
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .uptime {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+
+
+$(document).ready(function() {
+    let currentPage = parseInt('{{ current_page }}', 10) || 1;
+    let currentSort = '{{ sort_by }}';
+    let searchTimeout;
+    let hideTimeout;
+
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            searchMessage: params.get('searchMessage') || '',
+            searchUser: params.get('searchUser') || '',
+            sort: params.get('sort') || '-timestamp',
+            page: parseInt(params.get('page'), 10) || 1,
+            filters: JSON.parse(params.get('filters') || '{}')
+        };
+    }
+
+    function sortSelectableTable() {
+        const table = $('.selectable-table tbody');
+        const rows = table.find('tr').toArray();
+
+        rows.sort((a, b) => {
+            const textA = $(a).text().trim().toLowerCase();
+            const textB = $(b).text().trim().toLowerCase();
+            return textA.localeCompare(textB);
+        });
+
+        table.empty().append(rows);
+    }
+
+    function initializeFromUrl() {
+        const urlParams = getUrlParams();
+        currentSort = urlParams.sort;
+        currentPage = urlParams.page;
+        $('.search-input-message').val(urlParams.searchMessage);
+        $('.search-input-user').val(urlParams.searchUser);
+        $('#filter-modere').val(urlParams.filters.modere || '');
+        $('#filter-supprime').val(urlParams.filters.supprime || '');
+        $('#filter-status').val(urlParams.filters.status || '');
+        loadMessages(currentPage);
+        sortSelectableTable();
+    }
+
+    function handleCheckboxChange() {
+        updateUrlAndLoadMessages(1);
+    }
+
+    function handleSortClick() {
+        const field = $(this).data('field');
+        currentSort = currentSort === field ? `-${field}` : field;
+        updateUrlAndLoadMessages(1);
+    }
+
+    function handleFilterChange() {
+        updateUrlAndLoadMessages(1);
+    }
+
+    function handleSearchInput() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => updateUrlAndLoadMessages(1), 500);
+    }
+
+    function handleDropdownHover(show) {
+        clearTimeout(hideTimeout);
+        if (show) {
+            document.querySelector('.dropdown-content').style.display = 'block';
+        } else {
+            hideTimeout = setTimeout(() => {
+                document.querySelector('.dropdown-content').style.display = 'none';
+            }, 300);
+        }
+    }
+
+    function loadPage(page) {
+        updateUrlAndLoadMessages(page);
+    }
+
+    function updateUrlAndLoadMessages(page) {
+        const searchMessageQuery = $('.search-input-message').val();
+        const searchUserQuery = $('.search-input-user').val();
+        const filters = {
+            modere: $('#filter-modere').val(),
+            supprime: $('#filter-supprime').val(),
+            status: $('#filter-status').val() ? $('#filter-status').val().replace(/[\[\]']/g, '') : ''
+        };
+
+        const selectedChannels = $('.item-checkbox:checked').map(function() {
+            return $(this).closest('label').attr('data-item');
+        }).get();
+
+        const params = new URLSearchParams({
+            searchMessage: searchMessageQuery,
+            searchUser: searchUserQuery,
+            sort: currentSort,
+            page: page,
+            filters: JSON.stringify(filters)
+        });
+
+        selectedChannels.forEach(channel => params.append('channels', channel));
+
+        updateUrlParams(params);
+        loadMessages(page);
+    }
+
+    function updateUrlParams(params) {
+        const url = new URL(window.location.href);
+        url.search = params.toString();
+        window.history.pushState({}, '', url.toString());
+    }
+
+    function loadMessages(page = currentPage) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+
+        $.ajax({
+            url: url.toString(),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(response) {
+                updateTable(response.messages);
+                updatePagination(response.total_pages, page);
+                currentPage = page;
+            },
+            error: function() {
+                console.error('Error loading messages');
+            }
+        });
+    }
+
+    function updateTable(messages) {
+        const tbody = $('.data-table tbody').empty();
+        messages.forEach(msg => {
+            const statusHtml = Array.isArray(msg.status)
+                ? msg.status.map(status => `<span class="status-badge">${status}</span>`).join(' ')
+                : (msg.status ? `<span class="status-badge">${msg.status}</span>` : '');
+
+            const row = `
+                <tr>
+                    <td>${msg.channel || 'N/A'}</td>
+                    <td>${msg.id}</td>
+                    <td>${msg.message}</td>
+                    <td>${msg.user}</td>
+                    <td>${new Date(msg.timestamp).toLocaleString()}</td>
+                    <td>${msg.uptime || 'Inconnu'}</td>
+                    <td>${msg.is_moderated ? 'Oui' : 'Non'}</td>
+                    <td>${msg.sanction || '-'}</td>
+                    <td>${msg.duration || '-'}</td>
+                    <td>${msg.moderation_starttime || '-'}</td>
+                    <td>${msg.moderation_uptime || '-'}</td>
+                    <td class="status-cell">${statusHtml}</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    function updatePagination(totalPages, currentPage) {
+        const pagination = $('.pagination');
+        pagination.empty();
+
+        const maxPagesToShow = 5;
+        const halfWay = Math.floor(maxPagesToShow / 2);
+
+        let startPage = Math.max(1, currentPage - halfWay);
+        let endPage = Math.min(totalPages, currentPage + halfWay);
+
+        if (currentPage <= halfWay) {
+            endPage = Math.min(totalPages, maxPagesToShow);
+        }
+        if (currentPage >= totalPages - halfWay) {
+            startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+        }
+
+        if (currentPage > 1) pagination.append(`<button class="page-btn" onclick="loadPage(${currentPage - 1})">«</button>`);
+        if (startPage > 1) pagination.append(`<button class="page-btn" onclick="loadPage(1)">1</button>`);
+        if (startPage > 2) pagination.append(`<span>...</span>`);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.append(`<button class="page-btn ${currentPage === i ? 'active' : ''}" onclick="loadPage(${i})">${i}</button>`);
+        }
+
+        if (endPage < totalPages - 1) pagination.append(`<span>...</span>`);
+        if (endPage < totalPages) pagination.append(`<button class="page-btn" onclick="loadPage(${totalPages})">${totalPages}</button>`);
+        if (currentPage < totalPages) pagination.append(`<button class="page-btn" onclick="loadPage(${currentPage + 1})">»</button>`);
+    }
+
+    function copyToClipboard(element, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            element.classList.add('copied');
+            setTimeout(() => {
+                element.classList.remove('copied');
+            }, 1000);
+        });
+    }
+
+        function exportData(format) {
+            console.log(`Exporting data as ${format}`);
+            const searchMessageQuery = document.querySelector('.search-input-message').value;
+            const searchUserQuery = document.querySelector('.search-input-user').value;
+            const filters = {
+                modere: $('#filter-modere').val(),
+                supprime: $('#filter-supprime').val(),
+                status: $('#filter-status').val() ? $('#filter-status').val().replace(/[\[\]']/g, '') : ''
+            };
+
+            const selectedChannels = $('.item-checkbox:checked').map(function() {
+                return $(this).closest('label').attr('data-item');
+            }).get();
+
+            const params = new URLSearchParams({
+                searchMessage: searchMessageQuery,
+                searchUser: searchUserQuery,
+                sort: currentSort,
+                filters: JSON.stringify(filters)
+            });
+
+
+            selectedChannels.forEach(channel => params.append('channels', channel));
+
+            const exportUrl = `/export_global_filtered_${format}/?${params.toString()}`;
+
+            console.log(`Export URL: ${exportUrl}`);
+            window.location.href = exportUrl;
+        }
+
+    // Event Listeners
+document.addEventListener("DOMContentLoaded", function() {
+    const exportJsonBtn = document.getElementById("exportJsonBtn");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+    const exportXmlBtn = document.getElementById("exportXmlBtn");
+
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+            console.log('JSON export button clicked');
+            exportData('json');
+        });
+    } else {
+        console.error("Export JSON button not found!");
+    }
+
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+            console.log('CSV export button clicked');
+            exportData('csv');
+        });
+    } else {
+        console.error("Export CSV button not found!");
+    }
+
+    if (exportXmlBtn) {
+        exportXmlBtn.addEventListener("click", function(event) {
+            event.preventDefault();
+            console.log('XML export button clicked');
+            exportData('xml');
+        });
+    } else {
+        console.error("Export XML button not found!");
+    }
+});
+
+    document.addEventListener("click", function(event) {
+    if (event.target.id === "exportJsonBtn") {
+        event.preventDefault();
+        console.log("JSON export button clicked");
+        exportData("json");
+    } else if (event.target.id === "exportCsvBtn") {
+        event.preventDefault();
+        console.log("CSV export button clicked");
+        exportData("csv");
+    } else if (event.target.id === "exportXmlBtn") {
+        event.preventDefault();
+        console.log("XML export button clicked");
+        exportData("xml");
+    }
+});
+
+
+    $('.item-checkbox').change(handleCheckboxChange);
+    $('.sort-header').click(handleSortClick);
+    $('#filter-modere, #filter-supprime, #filter-status').change(handleFilterChange);
+    $('.search-input-message, .search-input-user').on('input', handleSearchInput);
+
+    document.querySelector('.dropdown').addEventListener('mouseenter', () => handleDropdownHover(true));
+    document.querySelector('.dropdown').addEventListener('mouseleave', () => handleDropdownHover(false));
+
+    const hoverBuffer = document.createElement('div');
+    hoverBuffer.style.position = 'absolute';
+    hoverBuffer.style.top = '100%';
+    hoverBuffer.style.left = '0';
+    hoverBuffer.style.width = '100%';
+    hoverBuffer.style.height = '30px';
+    hoverBuffer.style.background = 'transparent';
+    hoverBuffer.style.pointerEvents = 'auto';
+
+    document.querySelector('.dropdown').appendChild(hoverBuffer);
+    hoverBuffer.addEventListener('mouseenter', () => handleDropdownHover(true));
+
+    window.loadPage = loadPage;
+    initializeFromUrl();
+    window.addEventListener('popstate', initializeFromUrl);
+
+    window.copyId = (element, id) => copyToClipboard(element, id);
+    window.copyUser = (element, user) => copyToClipboard(element, user);
+});
+
+
+    </script>
+</head>
+<body>
+    <nav class="top-menu">
+        <h2>COMPREVE</h2>
+        <a href="{% url 'fichiers' %}" class="menu-item">Fichiers</a>
+        <a href="{% url 'recherche' %}" class="menu-item">Recherche</a>
+    </nav>
+
+    {% if filename %}
+    <div class="file-info">
+        <h3>{{ filename }}</h3>
+    </div>
+    {% endif %}
+
+<div class="main-container">
+    <div class="search-bars-container">
+        <div class="search-bar-message">
+            <input type="text" class="search-input-message" placeholder="Rechercher un message..." value="{{ search_query }}">
+            <div class="button-group">
+                <div class="dropdown">
+                    <button class="filter-btn">Filtrer</button>
+                    <div class="dropdown-content">
+                        <div class="filter-group">
+                            <label for="filter-modere">Modéré</label>
+                            <select id="filter-modere">
+                                <option value="">Tous</option>
+                                <option value="true">Oui</option>
+                                <option value="false">Non</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-supprime">Supprimé</label>
+                            <select id="filter-supprime">
+                                <option value="">Tous</option>
+                                <option value="true">Oui</option>
+                                <option value="false">Non</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-status">Status</label>
+                            <select id="filter-status">
+                                <option value="">Tous</option>
+                                {% for status in all_statuses %}
+                                <option value="{{ status }}">{{ status }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="search-bar-user">
+            <input type="text" class="search-input-user" placeholder="Rechercher un utilisateur..." value="{{ search_query }}">
+            <div class="dropdown">
+                <button class="export-btn">Télécharger</button>
+                <div class="dropdown-content">
+                        <a id= "exportJsonBtn" href="#">Télécharger en JSON  </a>
+                        <a id= "exportCsvBtn" href="#">Télécharger en CSV </a>
+                        <a id= "exportXmlBtn" href="#">Télécharger en XML </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="tables-container">
+        <div class="selectable-table" id="selectable-table">
+            {% for channel in items_from_db %}
+            <label class="grid-item" data-item="{{ channel }}">
+                {{ channel }}
+                <input type="checkbox" class="item-checkbox">
+            </label>
+            {% endfor %}
+        </div>
+
+                <div class="selected-table">
+
+                    <p>Total de messages : <span id="total-messages">{{ total_messages }}</span></p>
+                    <p>Nombre de messages supprimés : <span id="deleted-messages">{{ deleted_messages }}</span></p>
+                    <p>Nombre total d'utilisateurs : <span id="total-users">{{ total_users }}</span></p>
+                    <p>Nombre total de chaînes : <span id="total-channels">{{ total_channels }}</span></p>
+                    <p>Nombre total de streams : <span id="total-streams">{{ total_streams }}</span></p>
+                </div>
+    </div>
+</div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th class="sort-header" data-field="channel" style="width: 120px;">Channel</th>
+                <th class="sort-header" data-field="id" style="width: 100px;">ID</th>
+                <th class="sort-header" data-field="message" style="width: 300px;">Message</th>
+                <th class="sort-header" data-field="user" style="width: 150px;">User</th>
+                <th class="sort-header" data-field="timestamp" style="width: 180px;">Timestamp</th>
+                <th class="sort-header" data-field="uptime" style="width: 100px;">Uptime</th>
+                <th class="sort-header" data-field="is_moderated" style="width: 100px;">Modération</th>
+                <th class="sort-header" data-field="sanction" style="width: 115px;">Sanction</th>
+                <th class="sort-header" data-field="duration" style="width: 150px;">Durée</th>
+                <th class="sort-header" data-field="moderation_starttime" style="width: 150px;">Début Modération</th>
+                <th class="sort-header" data-field="moderation_uptime" style="width: 150px;">UpTime Modération</th>
+                <th class="sort-header" data-field="status" style="width: 150px;">Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in messages %}
+            <tr>
+                <td>{{ message.channel }}</td>
+                <td class="id-cell" onclick="copyId(this, '{{ message.id }}')" title="{{ message.id }}">
+                    {{ message.id|truncatechars:10 }}
+                </td>
+                <td class="message">{{ message.message }}</td>
+                <td class="user-cell" onclick="copyUser(this, '{{ message.user }}')" title="{{ message.user }}">
+                    {{ message.user }}
+                </td>
+                <td>{{ message.timestamp }}</td>
+                <td>{{ message.uptime }}</td>
+                <td>{{ message.is_moderated }}</td>
+                <td>{{ message.sanction }}</td>
+                <td>{{ message.duration }}</td>
+                <td>{{ message.moderation_starttime }}</td>
+                <td>{{ message.moderation_uptime }}</td>
+                <td class="status-cell">
+                    {% for status in message.status %}
+                    <span class="status-badge">{{ status }}</span>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+<div class="pagination">
+
+    {% if has_previous %}
+        <a class="page-btn first" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page=1"> ⏮ </a>
+        <a class="page-btn prev" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page={{ current_page|add:-1 }}"> ◀ </a>
+    {% endif %}
+
+
+    {% for i in prev_pages %}
+        <a class="page-btn" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page={{ i }}">{{ i }}</a>
+    {% endfor %}
+
+
+    <span class="page-btn active">{{ current_page }}</span>
+
+
+    {% for i in next_pages %}
+        <a class="page-btn" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page={{ i }}">{{ i }}</a>
+    {% endfor %}
+s
+
+    {% if has_next %}
+        <a class="page-btn next" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page={{ current_page|add:1 }}"> ▶ </a>
+        <a class="page-btn last" href="?file={{ filename }}&search={{ search_query }}&sort={{ sort_by }}&page={{ total_pages }}"> ⏭ </a>
+    {% endif %}
+</div>
+
+
+
+</body>
+</html>
